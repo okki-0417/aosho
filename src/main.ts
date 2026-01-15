@@ -1,18 +1,25 @@
-import { Map, Map2, spriteForestAcce, spriteForestBg } from "./data.js";
+import mapsData from "./data/maps.json" with { type: "json" };
+import { MAP_SIZE, spriteForestAcce, spriteForestBg, TILESIZE } from "./data.js";
 import { jiki } from "./jiki.js";
 import { townForestAcceImage, townForestBgImage } from "./misc.js";
 import { mob } from "./mob.js";
+import { Collision, collisions } from "./collision.js";
 import { renderer, Renderer } from "./renderer.js";
-import { Tile } from "./tile.js";
 
 const main = () => {
-  const tile = new Tile();
-  tile.judgeMap();
+  for (let y = 0; y < MAP_SIZE; y++) {
+    for (let x = 0; x < MAP_SIZE; x++) {
+      if (mapsData.collision[y * MAP_SIZE + x] === 0) continue;
+
+      collisions.push(new Collision(x * TILESIZE, y * TILESIZE));
+    }
+  }
 
   setInterval(() => {
     renderer.clear();
     renderer.updateCamera(jiki.x, jiki.y, jiki.sw, jiki.sh);
-    renderer.drawTiles(townForestBgImage, Map, spriteForestBg);
+
+    renderer.drawTiles(townForestBgImage, mapsData.layer1, spriteForestBg);
 
     jiki.update();
     for (let i = 0; i < mob.length; i++) {
@@ -25,7 +32,7 @@ const main = () => {
       mob[i]?.draw();
     }
 
-    renderer.drawTiles(townForestAcceImage, Map2, spriteForestAcce);
+    renderer.drawTiles(townForestAcceImage, mapsData.layer2, spriteForestAcce);
 
     renderer.reDrawTiles();
     renderer.render();

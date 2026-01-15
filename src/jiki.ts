@@ -1,7 +1,7 @@
 import { spriteJiki, TILESIZE } from "./data.js";
 import { checkHit, jikiImage, key } from "./misc.js";
 import { mob } from "./mob.js";
-import { obj } from "./obj.js";
+import { collisions } from "./collision.js";
 import { renderer } from "./renderer.js";
 
 //自機の歩行アニメーション
@@ -49,7 +49,7 @@ export function screenHit(direction: string, jiki: Jiki) {
 
 //プレイヤーとオブジェクトの当たり判定
 export function onObjCheckHit(direction: string, jiki: Jiki) {
-  for (let i = 0; i < obj.length; i++) {
+  for (let i = 0; i < collisions.length; i++) {
     if (
       checkHit(
         direction,
@@ -58,10 +58,10 @@ export function onObjCheckHit(direction: string, jiki: Jiki) {
         jiki.foot_y,
         jiki.foot_sw,
         jiki.foot_sh,
-        (obj[i]?.x || 0) as number,
-        (obj[i]?.y || 0) as number,
-        (obj[i]?.sz || 0) as number,
-        (obj[i]?.sz || 0) as number
+        (collisions[i]?.x || 0) as number,
+        (collisions[i]?.y || 0) as number,
+        (collisions[i]?.sz || 0) as number,
+        (collisions[i]?.sz || 0) as number
       )
     ) {
       return false;

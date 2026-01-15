@@ -1,6 +1,6 @@
 import { TILESIZE } from "./data.js";
 
-export class Obj {
+export class Collision {
   x: number;
   y: number;
   sz: number;
@@ -12,4 +12,4 @@ export class Obj {
   }
 }
 
-export const obj: Obj[] = [];
+export const collisions: Collision[] = [];

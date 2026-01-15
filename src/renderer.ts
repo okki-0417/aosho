@@ -2,7 +2,7 @@ import { MAP_SIZE, TILESIZE } from "./data.js";
 import { jiki } from "./jiki.js";
 import { checkHit } from "./misc.js";
 import { mob } from "./mob.js";
-import { obj } from "./obj.js";
+import { collisions } from "./collision.js";
 
 const SMOOTHING = false;
 const GAME_SPEED = 1000 / 60;
@@ -131,8 +131,8 @@ export class Renderer {
     const head = 20;
 
     // プレイヤーとオブジェクトの描画層調整
-    if (obj.length) {
-      for (let i = 0; i < obj.length; i++) {
+    if (collisions.length) {
+      for (let i = 0; i < collisions.length; i++) {
         // 見た目上の体で当たり判定
         if (
           checkHit(
@@ -141,10 +141,10 @@ export class Renderer {
             jiki.y + head,
             jiki.sw - body,
             jiki.sh - head,
-            obj[i]?.x as number,
-            obj[i]?.y as number,
-            obj[i]?.sz as number,
-            obj[i]?.sz as number
+            collisions[i]?.x as number,
+            collisions[i]?.y as number,
+            collisions[i]?.sz as number,
+            collisions[i]?.sz as number
           ) ||
           // オブジェクトから頭がはみ出ると当たり判定が機能しないから頭より少し下の体の部分でも判定する
           checkHit(
@@ -153,10 +153,10 @@ export class Renderer {
             jiki.y + head + 10,
             jiki.sw - body,
             jiki.sh - head - 10,
-            obj[i]?.x as number,
-            obj[i]?.y as number,
-            obj[i]?.sz as number,
-            obj[i]?.sz as number
+            collisions[i]?.x as number,
+            collisions[i]?.y as number,
+            collisions[i]?.sz as number,
+            collisions[i]?.sz as number
           )
         )
           jiki.draw();
@@ -204,9 +204,9 @@ export class Renderer {
     }
 
     // モブとオブジェクトの描画層調整。
-    if (mob.length && obj.length) {
+    if (mob.length && collisions.length) {
       for (let i = 0; i < mob.length; i++) {
-        for (let j = 0; j < obj.length; j++) {
+        for (let j = 0; j < collisions.length; j++) {
           if (
             checkHit(
               "up",
@@ -214,10 +214,10 @@ export class Renderer {
               ((mob[i]?.y || 0) + head) as number,
               ((mob[i]?.sw || 0) - body) as number,
               ((mob[i]?.sh || 0) - head) as number,
-              (obj[j]?.x || 0) as number,
-              (obj[j]?.y || 0) as number,
-              (obj[j]?.sz || 0) as number,
-              (obj[j]?.sz || 0) as number
+              (collisions[j]?.x || 0) as number,
+              (collisions[j]?.y || 0) as number,
+              (collisions[j]?.sz || 0) as number,
+              (collisions[j]?.sz || 0) as number
             ) ||
             checkHit(
               "up",
@@ -225,10 +225,10 @@ export class Renderer {
               ((mob[i]?.y || 0) + head + 10) as number,
               ((mob[i]?.sw || 0) - body) as number,
               ((mob[i]?.sh || 0) - body - 10) as number,
-              (obj[j]?.x || 0) as number,
-              (obj[j]?.y || 0) as number,
-              (obj[j]?.sz || 0) as number,
-              (obj[j]?.sz || 0) as number
+              (collisions[j]?.x || 0) as number,
+              (collisions[j]?.y || 0) as number,
+              (collisions[j]?.sz || 0) as number,
+              (collisions[j]?.sz || 0) as number
             )
           )
             mob[i]?.draw();
