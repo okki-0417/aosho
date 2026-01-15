@@ -6,8 +6,8 @@ import {
   playerOnMobCheckHit,
   screenHit,
 } from "./jiki.js";
-import { drawSprite } from "./main.js";
 import { jikiImage } from "./misc.js";
+import { renderer } from "./renderer.js";
 
 //モブクラス
 class Mob {
@@ -156,7 +156,7 @@ class Mob {
   }
 
   draw() {
-    drawSprite(jikiImage, this.snum, spriteJiki, this.x, this.y);
+    renderer.drawSprite(jikiImage, this.snum, spriteJiki, this.x, this.y);
   }
 }
 

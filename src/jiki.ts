@@ -1,8 +1,8 @@
 import { spriteJiki, TILESIZE } from "./data.js";
-import { drawSprite, FIELD_H, FIELD_W } from "./main.js";
 import { checkHit, jikiImage, key } from "./misc.js";
 import { mob } from "./mob.js";
 import { obj } from "./obj.js";
+import { renderer } from "./renderer.js";
 
 //自機の歩行アニメーション
 export function objMove(obj: Jiki, n: number, a: number, b: number, c: number) {
@@ -37,11 +37,11 @@ export function screenHit(direction: string, jiki: Jiki) {
   if (direction == "left") {
     if (jiki.foot_x - s <= 0) return false;
   } else if (direction == "right") {
-    if (FIELD_W <= jiki.foot_x + jiki.foot_sw) return false;
+    if (renderer.fieldWidth <= jiki.foot_x + jiki.foot_sw) return false;
   } else if (direction == "up") {
     if (jiki.y + t <= 0) return false;
   } else if (direction == "down") {
-    if (FIELD_H <= jiki.foot_y + jiki.foot_sh) return false;
+    if (renderer.fieldHeight <= jiki.foot_y + jiki.foot_sh) return false;
   }
 
   return true;
@@ -199,7 +199,7 @@ class Jiki {
   }
 
   draw() {
-    drawSprite(jikiImage, this.snum, spriteJiki, this.x, this.y);
+    renderer.drawSprite(jikiImage, this.snum, spriteJiki, this.x, this.y);
   }
 }
 
