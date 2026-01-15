@@ -1,4 +1,18 @@
-let p = 0;
+import {
+  HitMap,
+  Map,
+  Map2,
+  MAP_SIZE,
+  spriteForestAcce,
+  spriteForestBg,
+  TILESIZE,
+} from "./data.js";
+import { jiki } from "./jiki.js";
+import { checkHit, townForestAcceImage, townForestBgImage } from "./misc.js";
+import { mob } from "./mob.js";
+import { Obj, obj } from "./obj.js";
+
+export const p = 0;
 
 const SMOOTHING = false;
 
@@ -14,8 +28,8 @@ const CANVAS_W = SCREEN_W;
 const CANVAS_H = SCREEN_H;
 
 //フィールドサイズ
-const FIELD_W = TILESIZE * MAP_SIZE;
-const FIELD_H = TILESIZE * MAP_SIZE;
+export const FIELD_W = TILESIZE * MAP_SIZE;
+export const FIELD_H = TILESIZE * MAP_SIZE;
 
 //フィールドのマス数
 const BLOCK_W = FIELD_W / TILESIZE;
@@ -26,8 +40,9 @@ let camera_x = 0;
 let camera_y = 0;
 
 //キャンバス
-let can = document.getElementById("can");
+let can = document.getElementById("can") as HTMLCanvasElement;
 let con = can.getContext("2d");
+if (con == null) throw new Error("Could not get canvas context");
 can.style.border = "4px solid";
 can.width = CANVAS_W;
 can.height = CANVAS_H;
@@ -39,18 +54,15 @@ vcan.width = FIELD_W;
 vcan.height = FIELD_H;
 
 //画像のスムージング
-con.mojimageSmoothingEnabled = SMOOTHING;
-con.webkitimageSmoothingEnabled = SMOOTHING;
-con.msimageSmoothingEnabeled = SMOOTHING;
 con.imageSmoothingEnabled = SMOOTHING;
 
 //背景を描画する
-function drawTiles(image, map, sprite) {
+function drawTiles(image: HTMLImageElement, map: number[], sprite: any) {
   for (let y = 0; y < MAP_SIZE; y++) {
     for (let x = 0; x < MAP_SIZE; x++) {
-      snum = map[y * MAP_SIZE + x];
+      const snum = map[y * MAP_SIZE + x];
 
-      drawSprite(image, snum, sprite, x * TILESIZE, y * TILESIZE);
+      drawSprite(image, snum as number, sprite, x * TILESIZE, y * TILESIZE);
     }
   }
 }
@@ -66,7 +78,13 @@ function judgeMap() {
 }
 
 //自機を仮想マップに表示
-function drawSprite(image, snum, name, x, y) {
+export function drawSprite(
+  image: HTMLImageElement,
+  snum: number,
+  name: any,
+  x: number,
+  y: number
+) {
   let sx = name[snum].x;
   let sy = name[snum].y;
   let sw = name[snum].sw;
@@ -75,7 +93,7 @@ function drawSprite(image, snum, name, x, y) {
   //if( px+sw<camera_x || px>=camera_x+SCREEN_W
   //	|| py+sh<camera_y || py>=camera_y+SCREEN_H )return;
 
-  vcon.drawImage(image, sx, sy, sw, sh, x, y, sw, sh);
+  vcon?.drawImage(image, sx, sy, sw, sh, x, y, sw, sh);
 }
 
 //いろいろなものが描画される層を調整する
@@ -95,10 +113,10 @@ function reDrawTiles() {
           jiki.y + head,
           jiki.sw - body,
           jiki.sh - head,
-          obj[i].x,
-          obj[i].y,
-          obj[i].sz,
-          obj[i].sz,
+          obj[i]?.x as number,
+          obj[i]?.y as number,
+          obj[i]?.sz as number,
+          obj[i]?.sz as number
         ) ||
         //オブジェクトから頭がはみ出ると当たり判定が機能しないから頭より少し下の体の部分でも判定する
         checkHit(
@@ -107,10 +125,10 @@ function reDrawTiles() {
           jiki.y + head + 10,
           jiki.sw - body,
           jiki.sh - head - 10,
-          obj[i].x,
-          obj[i].y,
-          obj[i].sz,
-          obj[i].sz,
+          obj[i]?.x as number,
+          obj[i]?.y as number,
+          obj[i]?.sz as number,
+          obj[i]?.sz as number
         )
       )
         jiki.draw();
@@ -128,10 +146,10 @@ function reDrawTiles() {
           jiki.y + head,
           jiki.sw - body * 2,
           jiki.sh - head,
-          mob[i].x,
-          mob[i].y + TILESIZE,
-          mob[i].sz,
-          mob[i].sz,
+          mob[i]?.x as number,
+          ((mob[i]?.y || 0) + TILESIZE) as number,
+          mob[i]?.sz as number,
+          mob[i]?.sz as number
         )
       )
         jiki.draw();
@@ -143,17 +161,17 @@ function reDrawTiles() {
       if (
         checkHit(
           "up",
-          mob[i].x + body,
-          mob[i].y + head,
-          mob[i].sw - body * 2,
-          mob[i].sh - head,
+          ((mob[i]?.x || 0) + body) as number,
+          ((mob[i]?.y || 0) + head) as number,
+          ((mob[i]?.sw || 0) - body * 2) as number,
+          ((mob[i]?.sh || 0) - head) as number,
           jiki.x,
           jiki.y + TILESIZE,
           jiki.sz,
-          jiki.sz,
+          jiki.sz
         )
       )
-        mob[i].draw();
+        mob[i]?.draw();
     }
   }
 
@@ -164,28 +182,28 @@ function reDrawTiles() {
         if (
           checkHit(
             "up",
-            mob[i].x + body,
-            mob[i].y + head,
-            mob[i].sw - body,
-            mob[i].sh - head,
-            obj[j].x,
-            obj[j].y,
-            obj[j].sz,
-            obj[j].sz,
+            ((mob[i]?.x || 0) + body) as number,
+            ((mob[i]?.y || 0) + head) as number,
+            ((mob[i]?.sw || 0) - body) as number,
+            ((mob[i]?.sh || 0) - head) as number,
+            (obj[j]?.x || 0) as number,
+            (obj[j]?.y || 0) as number,
+            (obj[j]?.sz || 0) as number,
+            (obj[j]?.sz || 0) as number
           ) ||
           checkHit(
             "up",
-            mob[i].x + body,
-            mob[i].y + head + 10,
-            mob[i].sw - body,
-            mob[i].sh - body - 10,
-            obj[j].x,
-            obj[j].y,
-            obj[j].sz,
-            obj[j].sz,
+            ((mob[i]?.x || 0) + body) as number,
+            ((mob[i]?.y || 0) + head + 10) as number,
+            ((mob[i]?.sw || 0) - body) as number,
+            ((mob[i]?.sh || 0) - body - 10) as number,
+            (obj[j]?.x || 0) as number,
+            (obj[j]?.y || 0) as number,
+            (obj[j]?.sz || 0) as number,
+            (obj[j]?.sz || 0) as number
           )
         )
-          mob[i].draw();
+          mob[i]?.draw();
       }
     }
   }
@@ -196,7 +214,7 @@ function updateAll() {
   jiki.update();
 
   for (let i = 0; i < mob.length; i++) {
-    mob[i].update();
+    mob[i]?.update();
   }
 }
 
@@ -205,14 +223,14 @@ function drawAll() {
   jiki.draw();
 
   for (let i = 0; i < mob.length; i++) {
-    mob[i].draw();
+    mob[i]?.draw();
   }
 }
 
 //ゲームループ
 function GAMELOOP() {
-  vcon.clearRect(0, 0, CANVAS_W, CANVAS_H);
-  con.clearRect(0, 0, CANVAS_W, CANVAS_H);
+  vcon?.clearRect(0, 0, CANVAS_W, CANVAS_H);
+  con?.clearRect(0, 0, CANVAS_W, CANVAS_H);
 
   //カメラの位置を決定
   if (
@@ -237,7 +255,7 @@ function GAMELOOP() {
 
   reDrawTiles();
 
-  con.drawImage(
+  con?.drawImage(
     vcan,
     camera_x,
     camera_y,
@@ -246,7 +264,7 @@ function GAMELOOP() {
     0,
     0,
     CANVAS_W,
-    CANVAS_H,
+    CANVAS_H
   );
 }
 

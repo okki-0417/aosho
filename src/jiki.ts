@@ -1,5 +1,11 @@
+import { spriteJiki, TILESIZE } from "./data.js";
+import { drawSprite, FIELD_H, FIELD_W } from "./main.js";
+import { checkHit, jikiImage, key } from "./misc.js";
+import { mob } from "./mob.js";
+import { obj } from "./obj.js";
+
 //自機の歩行アニメーション
-function objMove(obj, n, a, b, c) {
+export function objMove(obj: Jiki, n: number, a: number, b: number, c: number) {
   //静止からの動き出し時、他方向からの方向転換時にまず右足を出す。
   if ((obj.snum != a && obj.snum != b && obj.snum != c) || obj.flag == 0) {
     obj.snum = a;
@@ -23,7 +29,7 @@ function objMove(obj, n, a, b, c) {
 }
 
 //画面端の当たり判定
-function screenHit(direction, jiki) {
+export function screenHit(direction: string, jiki: Jiki) {
   //なんかよくわかんないけどしっくり画面端の当たり判定するための調整用
   let s = 7;
   let t = 17;
@@ -42,7 +48,7 @@ function screenHit(direction, jiki) {
 }
 
 //プレイヤーとオブジェクトの当たり判定
-function onObjCheckHit(direction, jiki) {
+export function onObjCheckHit(direction: string, jiki: Jiki) {
   for (let i = 0; i < obj.length; i++) {
     if (
       checkHit(
@@ -52,10 +58,10 @@ function onObjCheckHit(direction, jiki) {
         jiki.foot_y,
         jiki.foot_sw,
         jiki.foot_sh,
-        obj[i].x,
-        obj[i].y,
-        obj[i].sz,
-        obj[i].sz,
+        (obj[i]?.x || 0) as number,
+        (obj[i]?.y || 0) as number,
+        (obj[i]?.sz || 0) as number,
+        (obj[i]?.sz || 0) as number
       )
     ) {
       return false;
@@ -66,10 +72,10 @@ function onObjCheckHit(direction, jiki) {
 }
 
 //オブジェクト直前でのプレイヤーとモブの挙動
-function moveNearByObj(jiki) {}
+function moveNearByObj(jiki: Jiki) {}
 
 //自機とモブの当たり判定
-function playerOnMobCheckHit(direction, jiki, mob) {
+export function playerOnMobCheckHit(direction: string, jiki: Jiki, mob: any) {
   for (let i = 0; i < mob.length; i++) {
     if (
       checkHit(
@@ -82,7 +88,7 @@ function playerOnMobCheckHit(direction, jiki, mob) {
         mob[i].x,
         mob[i].y + 45,
         mob[i].sz,
-        mob[i].sz - 5,
+        mob[i].sz - 5
       )
     ) {
       return false;
@@ -94,6 +100,21 @@ function playerOnMobCheckHit(direction, jiki, mob) {
 
 //自機クラス
 class Jiki {
+  x: number;
+  y: number;
+  sw: number;
+  sh: number;
+  speed: number;
+  snum: number;
+  walco: number;
+  flag: number;
+  sz: number;
+  foot_x: number;
+  foot_y: number;
+  foot_sw: number;
+  foot_sh: number;
+  n: number;
+
   constructor() {
     this.x = 96; //Math.floor( Math.random()*800 );
     this.y = 320; //Math.floor( Math.random()*800 );
@@ -182,4 +203,4 @@ class Jiki {
   }
 }
 
-let jiki = new Jiki();
+export let jiki = new Jiki();

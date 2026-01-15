@@ -1,31 +1,21 @@
-//ファイルを読み込み
-let townForestBgImage = new Image();
-townForestBgImage.src = "img/townForestBg.png";
+//キーボードの状態
+export const key: boolean[] = [];
 
-let townForestAcceImage = new Image();
-townForestAcceImage.src = "img/townForestAcce.png";
-
-let jikiImage = new Image();
+export const jikiImage = new Image();
 jikiImage.src = "img/LF-Chara-Sogen01.png";
 
-let aooniImage = new Image();
-aooniImage.src = "img/aooni.png";
-
-//キーボードの状態
-let key = [];
-
-//キーボードが押されたとき
-document.onkeydown = function (e) {
-  key[e.keyCode] = true;
-};
-
-//キーボードが離されたとき
-document.onkeyup = function (e) {
-  key[e.keyCode] = false;
-};
-
 //当たり判定
-function checkHit(direction, x1, y1, w1, h1, x2, y2, w2, h2) {
+export function checkHit(
+  direction: string,
+  x1: number,
+  y1: number,
+  w1: number,
+  h1: number,
+  x2: number,
+  y2: number,
+  w2: number,
+  h2: number
+) {
   //矩形同士の当たり判定を今からします
 
   //調整用の値
@@ -82,5 +72,24 @@ function checkHit(direction, x1, y1, w1, h1, x2, y2, w2, h2) {
         (top2 <= top1 && bottom1 <= bottom2))
     );
 }
+
+export const townForestBgImage = new Image();
+townForestBgImage.src = "../townForestBg.png";
+
+export const townForestAcceImage = new Image();
+townForestAcceImage.src = "../townForestAcce.png";
+
+const aooniImage = new Image();
+aooniImage.src = "../aooni.png";
+
+//キーボードが押されたとき
+document.onkeydown = function (e) {
+  key[e.keyCode] = true;
+};
+
+//キーボードが離されたとき
+document.onkeyup = function (e) {
+  key[e.keyCode] = false;
+};
 
 //プレイヤーとオブジェクトが近づいた際のプレイヤーの移動速度調整

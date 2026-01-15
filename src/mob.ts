@@ -1,6 +1,46 @@
+import { spriteJiki, TILESIZE } from "./data.js";
+import {
+  jiki,
+  objMove,
+  onObjCheckHit,
+  playerOnMobCheckHit,
+  screenHit,
+} from "./jiki.js";
+import { drawSprite } from "./main.js";
+import { jikiImage } from "./misc.js";
+
 //モブクラス
 class Mob {
-  constructor(x, y, left, right, up, down) {
+  x: number;
+  y: number;
+  sw: number;
+  sh: number;
+  sz: number;
+  snum: number;
+  n: number;
+  walco: number;
+  poss: number;
+  sign: number;
+  foot_x: number;
+  foot_y: number;
+  foot_sw: number;
+  foot_sh: number;
+  snumL: number;
+  snumR: number;
+  snumU: number;
+  snumD: number;
+  speed: number;
+  flag: number;
+  span: number;
+
+  constructor(
+    x: number,
+    y: number,
+    left: number,
+    right: number,
+    up: number,
+    down: number
+  ) {
     this.x = x;
     this.y = y;
     this.sw = TILESIZE;
@@ -23,9 +63,7 @@ class Mob {
     this.snumD = down;
 
     this.speed = 1;
-
     this.flag = 0;
-
     this.span = 30;
   }
 
@@ -122,4 +160,4 @@ class Mob {
   }
 }
 
-let mob = [new Mob(600, 300, 52, 55, 58, 49)];
+export const mob = [new Mob(600, 300, 52, 55, 58, 49)];

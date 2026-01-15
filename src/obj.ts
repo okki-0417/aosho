@@ -1,0 +1,15 @@
+import { TILESIZE } from "./data.js";
+
+export class Obj {
+  x: number;
+  y: number;
+  sz: number;
+
+  constructor(x: number, y: number) {
+    this.x = x;
+    this.y = y;
+    this.sz = TILESIZE;
+  }
+}
+
+export const obj: Obj[] = [];

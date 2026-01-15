@@ -1,11 +1,16 @@
 //1タイルのピクセル数
-const TILESIZE = 32;
+export const TILESIZE = 32;
 
 //マップのタイル数
-let MAP_SIZE = 32;
+export let MAP_SIZE = 32;
 
 class Sprite {
-  constructor(x, y, sw, sh) {
+  x: number;
+  y: number;
+  sw: number;
+  sh: number;
+
+  constructor(x: number, y: number, sw: number, sh: number) {
     this.x = x * TILESIZE;
     this.y = y * TILESIZE;
     this.sw = sw * TILESIZE;
@@ -13,8 +18,7 @@ class Sprite {
   }
 }
 
-console.time("spriteForestBg");
-let spriteForestBg = [
+export let spriteForestBg = [
   new Sprite(6, 0, 1, 1), //  0.空白
 
   new Sprite(0, 0, 1, 1), //  1.丸い水たまり
@@ -171,7 +175,7 @@ let spriteForestBg = [
 ];
 console.timeEnd("spriteForestBg");
 
-let spriteJiki = [
+export const spriteJiki = [
   new Sprite(0, 0, 1, 2), //  0.正面右足出し女
   new Sprite(1, 0, 1, 2), //  1.正面正立女
   new Sprite(2, 0, 1, 2), //  2.正面左足出し女
@@ -251,7 +255,7 @@ let spriteJiki = [
   new Sprite(11, 14, 1, 2), // 71.後ろ向き左足出しモブ女5
 ];
 
-let spriteForestAcce = [
+export const spriteForestAcce = [
   new Sprite(0, 0, 1, 1), //  0.空白
   new Sprite(1, 0, 1, 1), //  1.影
   new Sprite(8, 0, 1, 1), //  2.看板(剣盾)
@@ -395,7 +399,7 @@ let spriteForestAcce = [
   new Sprite(13, 27, 2, 3), //139.街灯(木)右
 ];
 
-let spriteAooni = [
+export const spriteAooni = [
   new Sprite(0, 0, 2, 3.5), //0.正面直立
   new Sprite(2, 0, 2, 3.5), //1.正面右足出し
   new Sprite(6, 0, 2, 3.5), //2.正面左足出し
@@ -411,7 +415,7 @@ let spriteAooni = [
 ];
 
 //値に応じたspriteを呼びだすマップ(一層目)
-let Map = [
+export const Map = [
   82, 82, 82, 82, 82, 82, 90, 118, 120, 82, 82, 82, 82, 82, 82, 82, 82, 82, 82,
   82, 82, 82, 82, 82, 82, 82, 82, 82, 82, 82, 82, 82, 82, 82, 82, 82, 82, 82,
   90, 118, 120, 82, 82, 82, 82, 82, 82, 82, 82, 82, 82, 82, 82, 82, 82, 82, 82,
@@ -470,7 +474,7 @@ let Map = [
 ];
 
 //マップ(二層目)
-let Map2 = [
+export const Map2 = [
   137, 137, 137, 137, 137, 137, 134, 135, 136, 137, 137, 137, 137, 137, 137,
   137, 137, 137, 137, 137, 137, 137, 137, 137, 137, 137, 137, 137, 137, 137,
   137, 137, 40, 40, 40, 40, 40, 40, 0, 0, 0, 40, 40, 40, 40, 40, 40, 40, 40, 40,
@@ -518,7 +522,7 @@ let Map2 = [
 ];
 
 //当たり判定のマップ
-let HitMap = [
+export const HitMap = [
   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
