@@ -4,7 +4,6 @@ import { checkHit } from "./misc.js";
 import { mob } from "./mob.js";
 import { obj } from "./obj.js";
 
-// 描画関連の定数
 const SMOOTHING = false;
 const GAME_SPEED = 1000 / 60;
 const SCREEN_W = 480;
@@ -12,16 +11,14 @@ const SCREEN_H = 480;
 const CANVAS_W = SCREEN_W;
 const CANVAS_H = SCREEN_H;
 
-// スプライトの型定義
-export interface SpriteData {
+export type SpriteData = {
   x: number;
   y: number;
   sw: number;
   sh: number;
-}
+};
 
 export class Renderer {
-  // 定数（外部公開用）
   static readonly TILE_SIZE = TILESIZE;
   static readonly SCREEN_WIDTH = SCREEN_W;
   static readonly SCREEN_HEIGHT = SCREEN_H;
@@ -29,53 +26,32 @@ export class Renderer {
   static readonly CANVAS_HEIGHT = CANVAS_H;
   static readonly GAME_SPEED = GAME_SPEED;
 
-  // フィールドサイズ
   readonly fieldWidth: number;
   readonly fieldHeight: number;
 
-  // キャンバス
   readonly canvas: HTMLCanvasElement;
   readonly ctx: CanvasRenderingContext2D;
   readonly virtualCanvas: HTMLCanvasElement;
   readonly virtualCtx: CanvasRenderingContext2D;
 
-  // カメラ座標
   cameraX = 0;
   cameraY = 0;
 
   constructor() {
-    // フィールドサイズ計算
     this.fieldWidth = TILESIZE * MAP_SIZE;
     this.fieldHeight = TILESIZE * MAP_SIZE;
 
-    // メインキャンバスの初期化
-    this.canvas = document.getElementById("can") as HTMLCanvasElement;
-    const ctx = this.canvas.getContext("2d");
-    if (ctx == null) throw new Error("Could not get canvas context");
-    this.ctx = ctx;
-
-    this.canvas.style.border = "4px solid";
-    this.canvas.width = CANVAS_W;
-    this.canvas.height = CANVAS_H;
-    this.ctx.imageSmoothingEnabled = SMOOTHING;
-
-    // 仮想キャンバスの初期化
-    this.virtualCanvas = document.createElement("canvas");
-    const vctx = this.virtualCanvas.getContext("2d");
-    if (vctx == null) throw new Error("Could not get virtual canvas context");
-    this.virtualCtx = vctx;
-
-    this.virtualCanvas.width = this.fieldWidth;
-    this.virtualCanvas.height = this.fieldHeight;
+    [this.canvas, this.ctx] = this.initMainCanvas();
+    [this.virtualCanvas, this.virtualCtx] = this.initVirtualCanvas();
   }
 
-  // 画面クリア
   clear(): void {
+    if (this.virtualCtx == null || this.ctx == null) return;
+
     this.virtualCtx.clearRect(0, 0, CANVAS_W, CANVAS_H);
     this.ctx.clearRect(0, 0, CANVAS_W, CANVAS_H);
   }
 
-  // スプライトを仮想キャンバスに描画
   drawSprite(
     image: HTMLImageElement,
     spriteIndex: number,
@@ -90,7 +66,6 @@ export class Renderer {
     this.virtualCtx.drawImage(image, sx, sy, sw, sh, x, y, sw, sh);
   }
 
-  // タイルマップを描画
   drawTiles(
     image: HTMLImageElement,
     map: number[],
@@ -99,6 +74,7 @@ export class Renderer {
     for (let y = 0; y < MAP_SIZE; y++) {
       for (let x = 0; x < MAP_SIZE; x++) {
         const spriteIndex = map[y * MAP_SIZE + x] ?? 0;
+
         this.drawSprite(
           image,
           spriteIndex,
@@ -110,7 +86,6 @@ export class Renderer {
     }
   }
 
-  // カメラ位置を更新（プレイヤー追従）
   updateCamera(
     playerX: number,
     playerY: number,
@@ -260,6 +235,38 @@ export class Renderer {
         }
       }
     }
+  }
+
+  private initMainCanvas(): [HTMLCanvasElement, CanvasRenderingContext2D] {
+    const [canvas, ctx] = this.createCanvas(CANVAS_W, CANVAS_H);
+
+    this.canvas.id = "can";
+    this.canvas.style.border = "4px solid";
+    this.ctx.imageSmoothingEnabled = SMOOTHING;
+    document.body.appendChild(this.canvas);
+
+    return [canvas, ctx];
+  }
+
+  private initVirtualCanvas(): [HTMLCanvasElement, CanvasRenderingContext2D] {
+    const [canvas, ctx] = this.createCanvas(this.fieldWidth, this.fieldHeight);
+
+    ctx.imageSmoothingEnabled = SMOOTHING;
+    return [canvas, ctx];
+  }
+
+  private createCanvas(
+    width: number,
+    height: number
+  ): [HTMLCanvasElement, CanvasRenderingContext2D] {
+    const canvas = document.createElement("canvas");
+    canvas.width = width;
+    canvas.height = height;
+
+    const ctx = canvas.getContext("2d");
+    if (ctx == null) throw new Error("Could not get canvas context");
+
+    return [canvas, ctx];
   }
 }
 
