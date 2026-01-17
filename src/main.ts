@@ -1,44 +1,49 @@
-import mapsData from "./data/maps.json" with { type: "json" };
-import { MAP_SIZE, spriteForestAcce, spriteForestBg, TILESIZE } from "./data.js";
-import { jiki } from "./jiki.js";
-import { townForestAcceImage, townForestBgImage } from "./misc.js";
-import { mob } from "./mob.js";
-import { Collision, collisions } from "./collision.js";
-import { renderer, Renderer } from "./renderer.js";
+import { Camera } from "./camera.js";
+import { CollisionService } from "./collisionService.js";
+import { collision, layer1, layer2 } from "./data.js";
+import { getDirection } from "./input.js";
+import { Jiki } from "./jiki.js";
+import { Mob } from "./mob.js";
+import { Renderer } from "./renderer.js";
 
 const main = () => {
-  for (let y = 0; y < MAP_SIZE; y++) {
-    for (let x = 0; x < MAP_SIZE; x++) {
-      if (mapsData.collision[y * MAP_SIZE + x] === 0) continue;
+  const camera = new Camera();
 
-      collisions.push(new Collision(x * TILESIZE, y * TILESIZE));
-    }
-  }
+  const collisionService = new CollisionService();
+  collisionService.init(collision);
+
+  const renderer = new Renderer(camera, collisionService);
+
+  const jiki = new Jiki();
+  const mobs: Mob[] = [new Mob(600, 300, 52, 55, 58, 49)];
 
   setInterval(() => {
     renderer.clear();
-    renderer.updateCamera(jiki.x, jiki.y, jiki.sw, jiki.sh);
+    camera.update(jiki);
 
-    renderer.drawTiles(townForestBgImage, mapsData.layer1, spriteForestBg);
+    renderer.drawTiles(layer1);
 
-    jiki.update();
-    for (let i = 0; i < mob.length; i++) {
-      mob[i]?.update();
+    const direction = getDirection();
+
+    if (direction) {
+      if (!collisionService.canMove(jiki, direction, mobs)) return;
+
+      jiki.move(direction);
+      jiki.animate(direction);
+    } else {
+      jiki.stop();
     }
 
-    jiki.draw();
-
-    for (let i = 0; i < mob.length; i++) {
-      mob[i]?.draw();
+    for (const mob of mobs) {
+      mob.update((dir) => collisionService.canMove(mob, dir, [jiki]));
     }
 
-    renderer.drawTiles(townForestAcceImage, mapsData.layer2, spriteForestAcce);
+    renderer.drawCharacters(jiki, mobs);
+    renderer.drawTiles(layer2);
 
-    renderer.reDrawTiles();
+    renderer.reDrawTiles(jiki, mobs);
     renderer.render();
   }, Renderer.GAME_SPEED);
 };
 
-window.onload = () => {
-  main();
-};
+window.onload = () => main();

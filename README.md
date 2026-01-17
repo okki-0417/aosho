@@ -1,28 +1,45 @@
 # RPG（風）
 
 プログラミングの基礎の練習として、RPG風のゲームを目指して作成されたプロジェクトです。
-JavaScript の Canvas API を使用して、ブラウザ上で動作します。
+TypeScript と Canvas API を使用して、ブラウザ上で動作します。
+
+## 開発環境
+
+- TypeScript
+- Vite
+
+## セットアップ
+
+```bash
+npm install
+npm run dev
+```
 
 ## 遊び方
 
-1. `index.html` をブラウザで開く
-2. 矢印キー（↑↓←→）でキャラクターを操作
+矢印キー（↑↓←→）でキャラクターを操作
 
 ## プロジェクト構成
 
 ```
-├── index.html      # エントリーポイント
-├── img/            # 画像素材
-│   ├── LF-Chara-Sogen01.png  # キャラクタースプライト
-│   ├── aooni.png             # 敵キャラクタースプライト
-│   ├── townForestBg.png      # 背景タイル
-│   └── townForestAcce.png    # アクセサリータイル
-└── js/
-    ├── misc.js     # 画像読み込み、キー入力、当たり判定関数
-    ├── data.js     # スプライト定義、マップデータ
-    ├── obj.js      # 障害物オブジェクトクラス
-    ├── jiki.js     # 自機クラス、移動・アニメーション処理
-    ├── teki.js     # 敵キャラクタークラス
-    ├── mob.js      # NPCクラス（ランダム移動）
-    └── main.js     # ゲームループ、描画処理、カメラ制御
+├── index.html
+├── src/
+│   ├── main.ts           # エントリーポイント、ゲームループ
+│   ├── renderer.ts       # 描画処理
+│   ├── camera.ts         # カメラ制御
+│   ├── input.ts          # キー入力処理
+│   ├── jiki.ts           # 自機クラス
+│   ├── mob.ts            # NPCクラス（ランダム移動）
+│   ├── collisionService.ts # 当たり判定
+│   ├── types.ts          # 型定義、Characterベースクラス
+│   ├── data.ts           # スプライト・マップデータ読み込み
+│   ├── assets/           # 画像素材
+│   │   ├── LF-Chara-Sogen01.png  # キャラクタースプライト
+│   │   ├── aooni.png             # 敵キャラクタースプライト
+│   │   ├── TownForestBg.png      # 背景タイル
+│   │   └── townForestAcce.png    # アクセサリータイル
+│   └── data/             # データファイル
+│       ├── maps.json     # マップデータ
+│       └── sprites.json  # スプライト定義
+└── tsconfig.json
 ```

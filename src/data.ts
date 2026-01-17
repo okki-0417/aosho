@@ -1,374 +1,124 @@
+import mapData from "./data/maps.json" with { type: "json" };
+import spritesData from "./data/sprites.json" with { type: "json" };
+
+import forestBgUrl from "./assets/TownForestBg.png";
+import forestAcceUrl from "./assets/townForestAcce.png";
+import jikiUrl from "./assets/LF-Chara-Sogen01.png";
+import aooniUrl from "./assets/aooni.png";
+
 export const TILESIZE = 32;
 export const MAP_SIZE = 32;
+export const FIELD_WIDTH = TILESIZE * MAP_SIZE;
+export const FIELD_HEIGHT = TILESIZE * MAP_SIZE;
 
-class Sprite {
-  x: number;
-  y: number;
-  sw: number;
-  sh: number;
+type Tuple<T, N extends number, R extends T[] = []> =
+  R["length"] extends N ? R : Tuple<T, N, [T, ...R]>;
 
-  constructor(x: number, y: number, sw: number, sh: number) {
-    this.x = x * TILESIZE;
-    this.y = y * TILESIZE;
-    this.sw = sw * TILESIZE;
-    this.sh = sh * TILESIZE;
-  }
-}
+export type MapRow = Tuple<number, 32>;
+export type TileMap = Tuple<MapRow, 32>;
 
-export const spriteForestBg = [
-  new Sprite(6, 0, 1, 1),
-  new Sprite(0, 0, 1, 1),
-  new Sprite(2, 0, 1, 1),
-  new Sprite(4, 0, 1, 1),
-  new Sprite(1, 0, 1, 1),
-  new Sprite(3, 0, 1, 1),
-  new Sprite(5, 0, 1, 1),
-  new Sprite(0, 6, 1, 1),
-  new Sprite(2, 6, 1, 1),
-  new Sprite(4, 6, 1, 1),
-  new Sprite(1, 6, 1, 1),
-  new Sprite(3, 6, 1, 1),
-  new Sprite(5, 6, 1, 1),
-  new Sprite(9, 0, 1, 1),
-  new Sprite(11, 0, 1, 1),
-  new Sprite(13, 0, 1, 1),
-  new Sprite(8, 0, 1, 1),
-  new Sprite(10, 0, 1, 1),
-  new Sprite(12, 0, 1, 1),
-  new Sprite(9, 3, 1, 1),
-  new Sprite(11, 3, 1, 1),
-  new Sprite(13, 3, 1, 1),
-  new Sprite(8, 3, 1, 1),
-  new Sprite(10, 3, 1, 1),
-  new Sprite(12, 3, 1, 1),
-  new Sprite(8, 6, 1, 1),
-  new Sprite(10, 6, 1, 1),
-  new Sprite(12, 6, 1, 1),
-  new Sprite(9, 6, 1, 1),
-  new Sprite(11, 6, 1, 1),
-  new Sprite(13, 6, 1, 1),
-  new Sprite(8, 9, 1, 1),
-  new Sprite(10, 9, 1, 1),
-  new Sprite(12, 9, 1, 1),
-  new Sprite(9, 9, 1, 1),
-  new Sprite(11, 9, 1, 1),
-  new Sprite(13, 9, 1, 1),
-  new Sprite(1, 9, 1, 1),
-  new Sprite(3, 9, 1, 1),
-  new Sprite(5, 9, 1, 1),
-  new Sprite(0, 9, 1, 1),
-  new Sprite(2, 9, 1, 1),
-  new Sprite(4, 9, 1, 1),
-  new Sprite(0, 1, 2, 2),
-  new Sprite(2, 1, 2, 2),
-  new Sprite(4, 1, 2, 2),
-  new Sprite(0, 7, 2, 2),
-  new Sprite(2, 7, 2, 2),
-  new Sprite(4, 7, 2, 2),
-  new Sprite(8, 1, 2, 2),
-  new Sprite(10, 1, 2, 2),
-  new Sprite(12, 1, 2, 2),
-  new Sprite(8, 4, 2, 2),
-  new Sprite(10, 4, 2, 2),
-  new Sprite(12, 4, 2, 2),
-  new Sprite(8, 7, 2, 2),
-  new Sprite(10, 7, 2, 2),
-  new Sprite(12, 7, 2, 2),
-  new Sprite(8, 10, 2, 2),
-  new Sprite(10, 10, 2, 2),
-  new Sprite(12, 10, 2, 2),
-  new Sprite(0, 10, 2, 2),
-  new Sprite(2, 10, 2, 2),
-  new Sprite(4, 10, 2, 2),
-  new Sprite(14, 6, 2, 1),
-  new Sprite(14, 7, 2, 1),
-  new Sprite(14, 8, 2, 1),
-  new Sprite(6, 6, 2, 1),
-  new Sprite(6, 7, 2, 1),
-  new Sprite(6, 8, 2, 1),
-  new Sprite(6, 9, 2, 1),
-  new Sprite(6, 10, 2, 1),
-  new Sprite(6, 11, 2, 1),
-  new Sprite(14, 3, 2, 1),
-  new Sprite(14, 4, 2, 1),
-  new Sprite(14, 5, 2, 1),
-  new Sprite(14, 0, 2, 1),
-  new Sprite(14, 1, 2, 1),
-  new Sprite(14, 2, 2, 1),
-  new Sprite(14, 9, 2, 1),
-  new Sprite(14, 10, 2, 1),
-  new Sprite(14, 11, 2, 1),
-  new Sprite(0, 12, 1, 1),
-  new Sprite(2, 12, 1, 1),
-  new Sprite(4, 12, 1, 1),
-  new Sprite(6, 12, 1, 1),
-  new Sprite(3, 12, 1, 1),
-  new Sprite(5, 12, 1, 1),
-  new Sprite(7, 12, 1, 1),
-  new Sprite(4.5, 13, 1, 2),
-  new Sprite(4, 13.5, 2, 1),
-  new Sprite(0, 3, 2, 2),
-  new Sprite(2, 3, 2, 2),
-  new Sprite(4, 3, 2, 2),
-  new Sprite(6, 3, 2, 2),
-  new Sprite(4, 13, 2, 1),
-  new Sprite(4, 14, 2, 1),
-  new Sprite(4, 13, 1, 2),
-  new Sprite(5, 13, 1, 2),
-  new Sprite(8, 18, 1, 3),
-  new Sprite(9, 18, 1, 3),
-  new Sprite(10, 18, 1, 3),
-  new Sprite(0, 24, 2, 2),
-  new Sprite(2, 24, 2, 2),
-  new Sprite(4, 24, 2, 2),
-  new Sprite(6, 24, 2, 2),
-  new Sprite(8, 24, 2, 2),
-  new Sprite(10, 24, 2, 2),
-  new Sprite(12, 24, 2, 2),
-  new Sprite(14, 24, 2, 2),
-  new Sprite(0, 26, 1, 1),
-  new Sprite(1, 26, 1, 1),
-  new Sprite(2, 26, 1, 1),
-  new Sprite(3, 26, 1, 1),
-  new Sprite(4, 26, 1, 1),
-  new Sprite(5, 26, 1, 1),
-  new Sprite(6, 26, 1, 1),
-  new Sprite(7, 26, 1, 1),
-  new Sprite(8, 26, 1, 1),
-  new Sprite(9, 26, 1, 1),
-  new Sprite(10, 26, 1, 1),
-];
+export type Sprite = {
+  image: HTMLImageElement;
+  srcX: number;
+  srcY: number;
+  width: number;
+  height: number;
+};
 
-export const spriteJiki = [
-  new Sprite(0, 0, 1, 2),
-  new Sprite(1, 0, 1, 2),
-  new Sprite(2, 0, 1, 2),
-  new Sprite(0, 2, 1, 2),
-  new Sprite(1, 2, 1, 2),
-  new Sprite(2, 2, 1, 2),
-  new Sprite(2, 4, 1, 2),
-  new Sprite(1, 4, 1, 2),
-  new Sprite(0, 4, 1, 2),
-  new Sprite(0, 6, 1, 2),
-  new Sprite(1, 6, 1, 2),
-  new Sprite(2, 6, 1, 2),
-  new Sprite(6, 0, 1, 2),
-  new Sprite(7, 0, 1, 2),
-  new Sprite(8, 0, 1, 2),
-  new Sprite(6, 2, 1, 2),
-  new Sprite(7, 2, 1, 2),
-  new Sprite(8, 2, 1, 2),
-  new Sprite(8, 4, 1, 2),
-  new Sprite(7, 4, 1, 2),
-  new Sprite(6, 4, 1, 2),
-  new Sprite(6, 6, 1, 2),
-  new Sprite(7, 6, 1, 2),
-  new Sprite(8, 6, 1, 2),
-  new Sprite(0, 8, 1, 2),
-  new Sprite(1, 8, 1, 2),
-  new Sprite(2, 8, 1, 2),
-  new Sprite(0, 10, 1, 2),
-  new Sprite(1, 10, 1, 2),
-  new Sprite(2, 10, 1, 2),
-  new Sprite(2, 12, 1, 2),
-  new Sprite(1, 12, 1, 2),
-  new Sprite(0, 12, 1, 2),
-  new Sprite(0, 14, 1, 2),
-  new Sprite(1, 14, 1, 2),
-  new Sprite(2, 14, 1, 2),
-  new Sprite(3, 8, 1, 2),
-  new Sprite(4, 8, 1, 2),
-  new Sprite(5, 8, 1, 2),
-  new Sprite(3, 10, 1, 2),
-  new Sprite(4, 10, 1, 2),
-  new Sprite(5, 10, 1, 2),
-  new Sprite(5, 12, 1, 2),
-  new Sprite(4, 12, 1, 2),
-  new Sprite(3, 12, 1, 2),
-  new Sprite(3, 14, 1, 2),
-  new Sprite(4, 14, 1, 2),
-  new Sprite(5, 14, 1, 2),
-  new Sprite(6, 8, 1, 2),
-  new Sprite(7, 8, 1, 2),
-  new Sprite(8, 8, 1, 2),
-  new Sprite(6, 10, 1, 2),
-  new Sprite(7, 10, 1, 2),
-  new Sprite(8, 10, 1, 2),
-  new Sprite(8, 12, 1, 2),
-  new Sprite(7, 12, 1, 2),
-  new Sprite(6, 12, 1, 2),
-  new Sprite(6, 14, 1, 2),
-  new Sprite(7, 14, 1, 2),
-  new Sprite(8, 14, 1, 2),
-  new Sprite(9, 8, 1, 2),
-  new Sprite(10, 8, 1, 2),
-  new Sprite(11, 8, 1, 2),
-  new Sprite(9, 10, 1, 2),
-  new Sprite(10, 10, 1, 2),
-  new Sprite(11, 10, 1, 2),
-  new Sprite(11, 12, 1, 2),
-  new Sprite(10, 12, 1, 2),
-  new Sprite(9, 12, 1, 2),
-  new Sprite(9, 14, 1, 2),
-  new Sprite(10, 14, 1, 2),
-  new Sprite(11, 14, 1, 2),
-];
+export type Layer = {
+  tileMap: TileMap;
+  sprites: Sprite[];
+};
 
-export const spriteForestAcce = [
-  new Sprite(0, 0, 1, 1),
-  new Sprite(1, 0, 1, 1),
-  new Sprite(8, 0, 1, 1),
-  new Sprite(9, 0, 1, 1),
-  new Sprite(10, 0, 1, 1),
-  new Sprite(11, 0, 1, 1),
-  new Sprite(12, 0, 1, 1),
-  new Sprite(13, 0, 1, 1),
-  new Sprite(14, 0, 1, 1),
-  new Sprite(15, 0, 1, 1),
-  new Sprite(16, 0, 1, 1),
-  new Sprite(8, 1, 1, 1),
-  new Sprite(9, 1, 1, 1),
-  new Sprite(10, 1, 1, 1),
-  new Sprite(11, 1, 1, 1),
-  new Sprite(12, 1, 1, 1),
-  new Sprite(13, 1, 1, 1),
-  new Sprite(14, 1, 1, 1),
-  new Sprite(15, 1, 1, 1),
-  new Sprite(3, 1, 1, 1),
-  new Sprite(4, 1, 1, 1),
-  new Sprite(5, 1, 1, 1),
-  new Sprite(6, 1, 1, 1),
-  new Sprite(7, 1, 1, 1),
-  new Sprite(0, 2, 4, 5),
-  new Sprite(4, 2, 4, 5),
-  new Sprite(0, 1, 1, 1),
-  new Sprite(1, 1, 1, 1),
-  new Sprite(2, 1, 1, 1),
-  new Sprite(2, 0, 1, 1),
-  new Sprite(3, 0, 1, 1),
-  new Sprite(4, 0, 1, 1),
-  new Sprite(5, 0, 1, 1),
-  new Sprite(6, 0, 1, 1),
-  new Sprite(7, 0, 1, 1),
-  new Sprite(8, 2, 1, 1),
-  new Sprite(9, 2, 1, 1),
-  new Sprite(10, 2, 1, 1),
-  new Sprite(11, 2, 1, 1),
-  new Sprite(12, 2, 1, 1),
-  new Sprite(13, 2, 1, 2),
-  new Sprite(14, 2, 2, 2),
-  new Sprite(8, 3, 1, 1),
-  new Sprite(9, 3, 1, 1),
-  new Sprite(10, 3, 1, 1),
-  new Sprite(11, 3, 1, 1),
-  new Sprite(12, 3, 1, 1),
-  new Sprite(8, 4, 1, 2),
-  new Sprite(9, 4, 1, 2),
-  new Sprite(10, 4, 1, 1),
-  new Sprite(11, 4, 1, 1),
-  new Sprite(12, 4, 1, 1),
-  new Sprite(13, 4, 1, 2),
-  new Sprite(14, 4, 2, 2),
-  new Sprite(10, 5, 1, 1),
-  new Sprite(11, 5, 1, 1),
-  new Sprite(12, 5, 1, 1),
-  new Sprite(0, 7, 1, 1),
-  new Sprite(1, 7, 1, 1),
-  new Sprite(2, 7, 1, 1),
-  new Sprite(4.5, 7, 2, 1),
-  new Sprite(7, 7, 1, 2),
-  new Sprite(8, 6, 6, 2),
-  new Sprite(14, 6, 2, 2),
-  new Sprite(0, 7, 1, 1),
-  new Sprite(1, 7, 1, 1),
-  new Sprite(2, 7, 1, 1),
-  new Sprite(3, 7, 1, 1),
-  new Sprite(4, 7, 1, 1),
-  new Sprite(7, 7, 1, 1),
-  new Sprite(8, 7, 1, 1),
-  new Sprite(9, 7, 1, 1),
-  new Sprite(10, 7, 1, 1),
-  new Sprite(11, 7, 1, 1),
-  new Sprite(12, 7, 1, 2),
-  new Sprite(13, 7, 2, 1),
-  new Sprite(15, 7, 1, 2),
-  new Sprite(0, 9, 1, 1),
-  new Sprite(1, 9, 1, 1),
-  new Sprite(2, 9, 1, 1),
-  new Sprite(3, 9, 1, 1),
-  new Sprite(4, 9, 1, 1),
-  new Sprite(5, 9, 1, 1),
-  new Sprite(6, 9, 1, 1),
-  new Sprite(7, 9, 1, 1),
-  new Sprite(8, 9, 1, 1),
-  new Sprite(9, 9, 1, 1),
-  new Sprite(10, 9, 1, 1),
-  new Sprite(11, 9, 1, 1),
-  new Sprite(13, 9, 1, 1),
-  new Sprite(14, 9, 1, 1),
-  new Sprite(0, 10, 1, 1),
-  new Sprite(1, 10, 1, 1),
-  new Sprite(2, 10, 1, 1),
-  new Sprite(3, 10, 1, 1),
-  new Sprite(4, 10, 1, 1),
-  new Sprite(5, 10, 1, 1),
-  new Sprite(6, 10, 1, 2),
-  new Sprite(7, 10, 1, 2),
-  new Sprite(8, 10, 1, 3),
-  new Sprite(9, 10, 1, 3),
-  new Sprite(10, 10, 1, 3),
-  new Sprite(11, 10, 2, 3),
-  new Sprite(13, 10, 1, 1),
-  new Sprite(14, 10, 1, 1),
-  new Sprite(15, 10, 1, 3),
-  new Sprite(0, 11, 3, 1),
-  new Sprite(3, 11, 2, 1),
-  new Sprite(5, 11, 1, 1),
-  new Sprite(13, 11, 1, 1),
-  new Sprite(14, 11, 1, 1),
-  new Sprite(0, 12, 3, 1),
-  new Sprite(3, 12, 1, 1),
-  new Sprite(4, 12, 1, 1),
-  new Sprite(5, 12, 1, 2),
-  new Sprite(6, 12, 1, 2),
-  new Sprite(7, 12, 1, 1),
-  new Sprite(13, 12, 1, 1),
-  new Sprite(0, 12, 3, 3),
-  new Sprite(3, 13, 1, 3),
-  new Sprite(4, 12, 1, 3),
-  new Sprite(7, 12, 1, 1),
-  new Sprite(8, 13, 3, 2),
-  new Sprite(11, 13, 1, 1),
-  new Sprite(12, 12, 1, 1),
-  new Sprite(13, 13, 1, 2),
-  new Sprite(14, 13, 1, 1),
-  new Sprite(15, 13, 1, 1),
-  new Sprite(11, 14, 1, 1),
-  new Sprite(12, 14, 1, 1),
-  new Sprite(14, 14, 1, 1),
-  new Sprite(15, 14, 1, 1),
-  new Sprite(1, 16, 7, 7),
-  new Sprite(5, 14, 3, 2),
-  new Sprite(8, 21, 1, 4),
-  new Sprite(9, 21, 1, 4),
-  new Sprite(10, 21, 1, 4),
-  new Sprite(9, 32, 1, 2),
-  new Sprite(11, 27, 2, 3),
-  new Sprite(13, 27, 2, 3),
-];
+type SpriteTuple = [number, number, number, number];
 
-export const spriteAooni = [
-  new Sprite(0, 0, 2, 3.5),
-  new Sprite(2, 0, 2, 3.5),
-  new Sprite(6, 0, 2, 3.5),
-  new Sprite(0, 3.5, 2, 3.5),
-  new Sprite(2, 3.5, 2, 3.5),
-  new Sprite(6, 3.5, 2, 3.5),
-  new Sprite(0, 7, 2, 3.5),
-  new Sprite(2, 7, 2, 3.5),
-  new Sprite(6, 7, 2, 3.5),
-  new Sprite(0, 10.5, 2, 3.5),
-  new Sprite(2, 10.5, 2, 3.5),
-  new Sprite(6, 10.5, 2, 3.5),
-];
+type LabeledSprite = {
+  label: string;
+  coords: SpriteTuple;
+};
 
+type DirectionSprites = {
+  leftFoot: SpriteTuple;
+  stand: SpriteTuple;
+  rightFoot: SpriteTuple;
+};
+
+type CharacterSprites = {
+  down: DirectionSprites;
+  left: DirectionSprites;
+  right: DirectionSprites;
+  up: DirectionSprites;
+};
+
+type JikiData = {
+  player: CharacterSprites;
+  mobs: CharacterSprites[];
+};
+
+const createImage = (src: string): HTMLImageElement => {
+  const image = new Image();
+  image.src = src;
+  return image;
+};
+
+const toSprite = (tuple: SpriteTuple, image: HTMLImageElement): Sprite => {
+  const [x, y, w, h] = tuple;
+  return {
+    image,
+    srcX: x * TILESIZE,
+    srcY: y * TILESIZE,
+    width: w * TILESIZE,
+    height: h * TILESIZE,
+  };
+};
+
+const toSprites = (data: SpriteTuple[], image: HTMLImageElement): Sprite[] => {
+  return data.map((tuple) => toSprite(tuple, image));
+};
+
+const toLabeledSprites = (data: LabeledSprite[], image: HTMLImageElement): Sprite[] => {
+  return data.map((item) => toSprite(item.coords, image));
+};
+
+const flattenCharacterSprites = (
+  char: CharacterSprites,
+  image: HTMLImageElement
+): Sprite[] => {
+  const directions: (keyof CharacterSprites)[] = ["down", "left", "right", "up"];
+  const motions: (keyof DirectionSprites)[] = ["leftFoot", "stand", "rightFoot"];
+
+  return directions.flatMap((dir) =>
+    motions.map((motion) => toSprite(char[dir][motion], image))
+  );
+};
+
+const toJikiSprites = (data: JikiData, image: HTMLImageElement): Sprite[] => {
+  const playerSprites = flattenCharacterSprites(data.player, image);
+  const mobSprites = data.mobs.flatMap((mob) =>
+    flattenCharacterSprites(mob, image)
+  );
+  return [...playerSprites, ...mobSprites];
+};
+
+const forestBgImage = createImage(forestBgUrl);
+const forestAcceImage = createImage(forestAcceUrl);
+const jikiImage = createImage(jikiUrl);
+const aooniImage = createImage(aooniUrl);
+
+const spriteForestBg = toLabeledSprites(spritesData.forestBg as LabeledSprite[], forestBgImage);
+const spriteForestAcce = toSprites(spritesData.forestAcce as SpriteTuple[], forestAcceImage);
+
+export const spriteJiki = toJikiSprites(spritesData.jiki as JikiData, jikiImage);
+export const spriteAooni = toSprites(spritesData.aooni as SpriteTuple[], aooniImage);
+
+export const layer1: Layer = {
+  tileMap: mapData.layer1 as TileMap,
+  sprites: spriteForestBg,
+};
+
+export const layer2: Layer = {
+  tileMap: mapData.layer2 as TileMap,
+  sprites: spriteForestAcce,
+};
+
+export const collision = mapData.collision as TileMap;

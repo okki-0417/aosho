@@ -1,206 +1,65 @@
-import { spriteJiki, TILESIZE } from "./data.js";
-import { checkHit, jikiImage, key } from "./misc.js";
-import { mob } from "./mob.js";
-import { collisions } from "./collision.js";
-import { renderer } from "./renderer.js";
+import { TILESIZE } from "./data.js";
+import { Character, type Direction } from "./types.js";
 
-//自機の歩行アニメーション
-export function objMove(obj: Jiki, n: number, a: number, b: number, c: number) {
-  //静止からの動き出し時、他方向からの方向転換時にまず右足を出す。
-  if ((obj.snum != a && obj.snum != b && obj.snum != c) || obj.flag == 0) {
-    obj.snum = a;
-    if (obj.walco % n == 0) obj.flag = 1;
-  }
-
-  //フラグで最初から最後まで面倒見る
-  if (obj.walco % n == 1 && obj.flag == 1) {
-    obj.snum = b;
-    obj.flag = 2;
-  } else if (obj.walco % n == 1 && obj.flag == 2) {
-    obj.snum = c;
-    obj.flag = 3;
-  } else if (obj.walco % n == 1 && obj.flag == 3) {
-    obj.snum = b;
-    obj.flag = 4;
-  } else if (obj.walco % n == 1 && obj.flag == 4) {
-    obj.snum = a;
-    obj.flag = 1;
-  }
-}
-
-//画面端の当たり判定
-export function screenHit(direction: string, jiki: Jiki) {
-  //なんかよくわかんないけどしっくり画面端の当たり判定するための調整用
-  let s = 7;
-  let t = 17;
-
-  if (direction == "left") {
-    if (jiki.foot_x - s <= 0) return false;
-  } else if (direction == "right") {
-    if (renderer.fieldWidth <= jiki.foot_x + jiki.foot_sw) return false;
-  } else if (direction == "up") {
-    if (jiki.y + t <= 0) return false;
-  } else if (direction == "down") {
-    if (renderer.fieldHeight <= jiki.foot_y + jiki.foot_sh) return false;
-  }
-
-  return true;
-}
-
-//プレイヤーとオブジェクトの当たり判定
-export function onObjCheckHit(direction: string, jiki: Jiki) {
-  for (let i = 0; i < collisions.length; i++) {
-    if (
-      checkHit(
-        direction,
-
-        jiki.foot_x,
-        jiki.foot_y,
-        jiki.foot_sw,
-        jiki.foot_sh,
-        (collisions[i]?.x || 0) as number,
-        (collisions[i]?.y || 0) as number,
-        (collisions[i]?.sz || 0) as number,
-        (collisions[i]?.sz || 0) as number
-      )
-    ) {
-      return false;
-      break;
-    }
-  }
-  return true;
-}
-
-//オブジェクト直前でのプレイヤーとモブの挙動
-function moveNearByObj(jiki: Jiki) {}
-
-//自機とモブの当たり判定
-export function playerOnMobCheckHit(direction: string, jiki: Jiki, mob: any) {
-  for (let i = 0; i < mob.length; i++) {
-    if (
-      checkHit(
-        direction,
-
-        jiki.foot_x,
-        jiki.foot_y,
-        jiki.foot_sw,
-        jiki.foot_sh,
-        mob[i].x,
-        mob[i].y + 45,
-        mob[i].sz,
-        mob[i].sz - 5
-      )
-    ) {
-      return false;
-      break;
-    }
-  }
-  return true;
-}
-
-//自機クラス
-class Jiki {
-  x: number;
-  y: number;
+export class Jiki extends Character {
   sw: number;
   sh: number;
   speed: number;
-  snum: number;
-  walco: number;
-  flag: number;
-  sz: number;
-  foot_x: number;
-  foot_y: number;
-  foot_sw: number;
-  foot_sh: number;
-  n: number;
 
   constructor() {
-    this.x = 96; //Math.floor( Math.random()*800 );
-    this.y = 320; //Math.floor( Math.random()*800 );
+    super();
+    this.x = 96;
+    this.y = 320;
     this.sw = TILESIZE;
     this.sh = TILESIZE * 2;
     this.speed = 2;
     this.snum = 1;
-    this.walco = 0;
-    this.flag = 0;
     this.sz = 32;
 
     this.foot_x = this.x + 10;
     this.foot_y = this.y + this.sh - 5;
     this.foot_sw = 16;
     this.foot_sh = 5;
-    this.n = 10;
   }
 
-  update() {
-    if (key[37]) {
-      if (
-        onObjCheckHit("left", this) &&
-        playerOnMobCheckHit("left", this, mob) &&
-        screenHit("left", this)
-      ) {
-        this.x -= this.speed;
-        this.foot_x -= this.speed;
-      }
-
-      this.walco++;
-
-      objMove(this, this.n, 3, 4, 5);
-    } else if (key[39]) {
-      if (
-        onObjCheckHit("right", this) &&
-        playerOnMobCheckHit("right", this, mob) &&
-        screenHit("right", this)
-      ) {
-        this.x += this.speed;
-        this.foot_x += this.speed;
-      }
-
-      this.walco++;
-
-      objMove(this, this.n, 6, 7, 8);
-    } else if (key[38]) {
-      if (
-        onObjCheckHit("up", this) &&
-        playerOnMobCheckHit("up", this, mob) &&
-        screenHit("up", this)
-      ) {
-        this.y -= this.speed;
-        this.foot_y -= this.speed;
-      }
-
-      this.walco++;
-
-      objMove(this, this.n, 9, 10, 11);
-    } else if (key[40]) {
-      if (
-        onObjCheckHit("down", this) &&
-        playerOnMobCheckHit("down", this, mob) &&
-        screenHit("down", this)
-      ) {
-        this.y += this.speed;
-        this.foot_y += this.speed;
-      }
-
-      this.walco++;
-
-      objMove(this, this.n, 0, 1, 2);
-    } else {
-      //静止時は向いている方向で正立姿勢に戻す
-      if (this.snum == 0 || this.snum == 2) this.snum = 1;
-      if (this.snum == 3 || this.snum == 5) this.snum = 4;
-      if (this.snum == 6 || this.snum == 8) this.snum = 7;
-      if (this.snum == 9 || this.snum == 11) this.snum = 10;
-
-      this.flag = 0;
-      this.walco = 0;
+  protected getSpriteIndex(direction: Direction): number {
+    switch (direction) {
+      case "down":
+        return 1;
+      case "left":
+        return 4;
+      case "right":
+        return 7;
+      case "up":
+        return 10;
     }
   }
 
-  draw() {
-    renderer.drawSprite(jikiImage, this.snum, spriteJiki, this.x, this.y);
+  move(direction: Direction) {
+    switch (direction) {
+      case "left":
+        this.x -= this.speed;
+        this.foot_x -= this.speed;
+        break;
+      case "right":
+        this.x += this.speed;
+        this.foot_x += this.speed;
+        break;
+      case "up":
+        this.y -= this.speed;
+        this.foot_y -= this.speed;
+        break;
+      case "down":
+        this.y += this.speed;
+        this.foot_y += this.speed;
+        break;
+    }
+  }
+
+  stop() {
+    const base = this.snum - (this.snum % 3) + 1;
+    this.snum = base;
+    this.flag = 0;
+    this.walco = 0;
   }
 }
-
-export let jiki = new Jiki();

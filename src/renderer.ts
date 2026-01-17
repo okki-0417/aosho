@@ -1,8 +1,15 @@
-import { MAP_SIZE, TILESIZE } from "./data.js";
-import { jiki } from "./jiki.js";
-import { checkHit } from "./misc.js";
-import { mob } from "./mob.js";
-import { collisions } from "./collision.js";
+import { Camera } from "./camera.js";
+import { CollisionService } from "./collisionService.js";
+import {
+  FIELD_HEIGHT,
+  FIELD_WIDTH,
+  TILESIZE,
+  spriteJiki,
+  type Layer,
+  type Sprite,
+} from "./data.js";
+import { Jiki } from "./jiki.js";
+import { Mob } from "./mob.js";
 
 const SMOOTHING = false;
 const GAME_SPEED = 1000 / 60;
@@ -10,13 +17,6 @@ const SCREEN_W = 480;
 const SCREEN_H = 480;
 const CANVAS_W = SCREEN_W;
 const CANVAS_H = SCREEN_H;
-
-export type SpriteData = {
-  x: number;
-  y: number;
-  sw: number;
-  sh: number;
-};
 
 export class Renderer {
   static readonly TILE_SIZE = TILESIZE;
@@ -26,20 +26,17 @@ export class Renderer {
   static readonly CANVAS_HEIGHT = CANVAS_H;
   static readonly GAME_SPEED = GAME_SPEED;
 
-  readonly fieldWidth: number;
-  readonly fieldHeight: number;
-
   readonly canvas: HTMLCanvasElement;
   readonly ctx: CanvasRenderingContext2D;
   readonly virtualCanvas: HTMLCanvasElement;
   readonly virtualCtx: CanvasRenderingContext2D;
 
-  cameraX = 0;
-  cameraY = 0;
+  private camera: Camera;
+  private collisionService: CollisionService;
 
-  constructor() {
-    this.fieldWidth = TILESIZE * MAP_SIZE;
-    this.fieldHeight = TILESIZE * MAP_SIZE;
+  constructor(camera: Camera, collisionService: CollisionService) {
+    this.camera = camera;
+    this.collisionService = collisionService;
 
     [this.canvas, this.ctx] = this.initMainCanvas();
     [this.virtualCanvas, this.virtualCtx] = this.initVirtualCanvas();
@@ -52,69 +49,41 @@ export class Renderer {
     this.ctx.clearRect(0, 0, CANVAS_W, CANVAS_H);
   }
 
-  drawSprite(
-    image: HTMLImageElement,
-    spriteIndex: number,
-    sprites: SpriteData[],
-    x: number,
-    y: number
-  ): void {
-    const sprite = sprites[spriteIndex];
-    if (!sprite) return;
-
-    const { x: sx, y: sy, sw, sh } = sprite;
-    this.virtualCtx.drawImage(image, sx, sy, sw, sh, x, y, sw, sh);
+  drawSprite(sprite: Sprite, destX: number, destY: number): void {
+    const { image, srcX, srcY, width, height } = sprite;
+    this.virtualCtx.drawImage(
+      image,
+      srcX,
+      srcY,
+      width,
+      height,
+      destX,
+      destY,
+      width,
+      height
+    );
   }
 
-  drawTiles(
-    image: HTMLImageElement,
-    map: number[],
-    sprites: SpriteData[]
-  ): void {
-    for (let y = 0; y < MAP_SIZE; y++) {
-      for (let x = 0; x < MAP_SIZE; x++) {
-        const spriteIndex = map[y * MAP_SIZE + x] ?? 0;
-
-        this.drawSprite(
-          image,
-          spriteIndex,
-          sprites,
-          x * TILESIZE,
-          y * TILESIZE
-        );
+  drawTiles(layer: Layer): void {
+    let y = 0;
+    for (const row of layer.tileMap) {
+      let x = 0;
+      for (const spriteIndex of row) {
+        const sprite = layer.sprites[spriteIndex];
+        if (sprite) {
+          this.drawSprite(sprite, x * TILESIZE, y * TILESIZE);
+        }
+        x++;
       }
+      y++;
     }
   }
 
-  updateCamera(
-    playerX: number,
-    playerY: number,
-    playerW: number,
-    playerH: number
-  ): void {
-    // 横方向のカメラ追従
-    if (
-      CANVAS_W / 2 - 17 <= playerX &&
-      playerX + playerW <= this.fieldWidth - CANVAS_W / 2 + 17
-    ) {
-      this.cameraX = playerX + playerW / 2 - CANVAS_W / 2;
-    }
-
-    // 縦方向のカメラ追従
-    if (
-      CANVAS_H / 2 - 32 <= playerY &&
-      playerY + playerH <= this.fieldHeight - CANVAS_H / 2 + 33
-    ) {
-      this.cameraY = playerY + playerH / 2 - CANVAS_H / 2;
-    }
-  }
-
-  // 仮想キャンバスからメインキャンバスへ転送
   render(): void {
     this.ctx.drawImage(
       this.virtualCanvas,
-      this.cameraX,
-      this.cameraY,
+      this.camera.x,
+      this.camera.y,
       SCREEN_W,
       SCREEN_H,
       0,
@@ -124,114 +93,113 @@ export class Renderer {
     );
   }
 
-  // いろいろなものが描画される層を調整する
-  reDrawTiles() {
-    // 自機キャラの見た目通りの体で当たり判定を行うための調整用
+  private drawCharacter(char: { x: number; y: number; snum: number }) {
+    const sprite = spriteJiki[char.snum];
+    if (sprite) this.drawSprite(sprite, char.x, char.y);
+  }
+
+  drawCharacters(jiki: Jiki, mobs: Mob[]) {
+    this.drawCharacter(jiki);
+    for (const m of mobs) {
+      if (m) this.drawCharacter(m);
+    }
+  }
+
+  reDrawTiles(jiki: Jiki, mobs: Mob[]) {
     const body = 5;
     const head = 20;
+    const collisions = this.collisionService.getCollisions();
 
-    // プレイヤーとオブジェクトの描画層調整
-    if (collisions.length) {
-      for (let i = 0; i < collisions.length; i++) {
-        // 見た目上の体で当たり判定
-        if (
-          checkHit(
-            "up",
-            jiki.x + body,
-            jiki.y + head,
-            jiki.sw - body,
-            jiki.sh - head,
-            collisions[i]?.x as number,
-            collisions[i]?.y as number,
-            collisions[i]?.sz as number,
-            collisions[i]?.sz as number
-          ) ||
-          // オブジェクトから頭がはみ出ると当たり判定が機能しないから頭より少し下の体の部分でも判定する
-          checkHit(
-            "up",
-            jiki.x + body,
-            jiki.y + head + 10,
-            jiki.sw - body,
-            jiki.sh - head - 10,
-            collisions[i]?.x as number,
-            collisions[i]?.y as number,
-            collisions[i]?.sz as number,
-            collisions[i]?.sz as number
-          )
-        )
-          jiki.draw();
+    for (const collision of collisions) {
+      const collisionBounds = {
+        x: collision.x,
+        y: collision.y,
+        w: collision.sz,
+        h: collision.sz,
+      };
+      const jikiBounds1 = {
+        x: jiki.x + body,
+        y: jiki.y + head,
+        w: jiki.sw - body,
+        h: jiki.sh - head,
+      };
+      const jikiBounds2 = {
+        x: jiki.x + body,
+        y: jiki.y + head + 10,
+        w: jiki.sw - body,
+        h: jiki.sh - head - 10,
+      };
+
+      if (
+        this.collisionService.checkHitUp(jikiBounds1, collisionBounds) ||
+        this.collisionService.checkHitUp(jikiBounds2, collisionBounds)
+      ) {
+        this.drawCharacter(jiki);
       }
     }
 
-    // プレイヤーとモブの描画層調整
-    if (mob.length) {
-      // プレイヤーとモブの下半身が重なってるなら自機を再描画
-      for (let i = 0; i < mob.length; i++) {
-        if (
-          checkHit(
-            "up",
-            jiki.x + body,
-            jiki.y + head,
-            jiki.sw - body * 2,
-            jiki.sh - head,
-            mob[i]?.x as number,
-            ((mob[i]?.y || 0) + TILESIZE) as number,
-            mob[i]?.sz as number,
-            mob[i]?.sz as number
-          )
-        )
-          jiki.draw();
-      }
+    for (const m of mobs) {
+      if (!m) continue;
+      const mobLowerBounds = { x: m.x, y: m.y + TILESIZE, w: m.sz, h: m.sz };
+      const jikiBounds = {
+        x: jiki.x + body,
+        y: jiki.y + head,
+        w: jiki.sw - body * 2,
+        h: jiki.sh - head,
+      };
 
-      // モブとプレイヤーの下半身が重なってるなら自機を再描画
-      for (let i = 0; i < mob.length; i++) {
-        // プレイヤーとモブの下半身が重なってるなら自機を再描画
-        if (
-          checkHit(
-            "up",
-            ((mob[i]?.x || 0) + body) as number,
-            ((mob[i]?.y || 0) + head) as number,
-            ((mob[i]?.sw || 0) - body * 2) as number,
-            ((mob[i]?.sh || 0) - head) as number,
-            jiki.x,
-            jiki.y + TILESIZE,
-            jiki.sz,
-            jiki.sz
-          )
-        )
-          mob[i]?.draw();
+      if (this.collisionService.checkHitUp(jikiBounds, mobLowerBounds)) {
+        this.drawCharacter(jiki);
       }
     }
 
-    // モブとオブジェクトの描画層調整。
-    if (mob.length && collisions.length) {
-      for (let i = 0; i < mob.length; i++) {
-        for (let j = 0; j < collisions.length; j++) {
-          if (
-            checkHit(
-              "up",
-              ((mob[i]?.x || 0) + body) as number,
-              ((mob[i]?.y || 0) + head) as number,
-              ((mob[i]?.sw || 0) - body) as number,
-              ((mob[i]?.sh || 0) - head) as number,
-              (collisions[j]?.x || 0) as number,
-              (collisions[j]?.y || 0) as number,
-              (collisions[j]?.sz || 0) as number,
-              (collisions[j]?.sz || 0) as number
-            ) ||
-            checkHit(
-              "up",
-              ((mob[i]?.x || 0) + body) as number,
-              ((mob[i]?.y || 0) + head + 10) as number,
-              ((mob[i]?.sw || 0) - body) as number,
-              ((mob[i]?.sh || 0) - body - 10) as number,
-              (collisions[j]?.x || 0) as number,
-              (collisions[j]?.y || 0) as number,
-              (collisions[j]?.sz || 0) as number,
-              (collisions[j]?.sz || 0) as number
-            )
-          )
-            mob[i]?.draw();
+    for (const m of mobs) {
+      if (!m) continue;
+      const mobBounds = {
+        x: m.x + body,
+        y: m.y + head,
+        w: m.sw - body * 2,
+        h: m.sh - head,
+      };
+      const jikiLowerBounds = {
+        x: jiki.x,
+        y: jiki.y + TILESIZE,
+        w: jiki.sz,
+        h: jiki.sz,
+      };
+
+      if (this.collisionService.checkHitUp(mobBounds, jikiLowerBounds)) {
+        this.drawCharacter(m);
+      }
+    }
+
+    for (const m of mobs) {
+      if (!m) continue;
+      for (const collision of collisions) {
+        const collisionBounds = {
+          x: collision.x,
+          y: collision.y,
+          w: collision.sz,
+          h: collision.sz,
+        };
+        const mobBounds1 = {
+          x: m.x + body,
+          y: m.y + head,
+          w: m.sw - body,
+          h: m.sh - head,
+        };
+        const mobBounds2 = {
+          x: m.x + body,
+          y: m.y + head + 10,
+          w: m.sw - body,
+          h: m.sh - body - 10,
+        };
+
+        if (
+          this.collisionService.checkHitUp(mobBounds1, collisionBounds) ||
+          this.collisionService.checkHitUp(mobBounds2, collisionBounds)
+        ) {
+          this.drawCharacter(m);
         }
       }
     }
@@ -240,16 +208,16 @@ export class Renderer {
   private initMainCanvas(): [HTMLCanvasElement, CanvasRenderingContext2D] {
     const [canvas, ctx] = this.createCanvas(CANVAS_W, CANVAS_H);
 
-    this.canvas.id = "can";
-    this.canvas.style.border = "4px solid";
-    this.ctx.imageSmoothingEnabled = SMOOTHING;
-    document.body.appendChild(this.canvas);
+    canvas.id = "can";
+    canvas.style.border = "4px solid";
+    ctx.imageSmoothingEnabled = SMOOTHING;
+    document.body.appendChild(canvas);
 
     return [canvas, ctx];
   }
 
   private initVirtualCanvas(): [HTMLCanvasElement, CanvasRenderingContext2D] {
-    const [canvas, ctx] = this.createCanvas(this.fieldWidth, this.fieldHeight);
+    const [canvas, ctx] = this.createCanvas(FIELD_WIDTH, FIELD_HEIGHT);
 
     ctx.imageSmoothingEnabled = SMOOTHING;
     return [canvas, ctx];
@@ -269,6 +237,3 @@ export class Renderer {
     return [canvas, ctx];
   }
 }
-
-// シングルトンインスタンス
-export const renderer = new Renderer();
